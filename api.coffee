@@ -33,14 +33,15 @@ getLocalQueue = (cb)->
 				#console.log playingSongs
 				selected = playingSongs[song.name]
 				
-				if song.hasOwnProperty('current')
-					selected.current = true
-				else
-					selected.current = false
+				if(selected!=undefined)
+					if song.hasOwnProperty('current')
+						selected.current = true
+					else
+						selected.current = false
 					
-				selected.duration = song.duration
-				songs.push(selected)
-	#			console.log(songs)
+					selected.duration = song.duration
+					songs.push(selected)
+	#				console.log(songs)
 
 			cb(songs)
 
@@ -71,9 +72,7 @@ exports.getStatusDebug = (req,res)->
 
 
 
-exports.deleteSong = (id)->
-	vlc.status.delete id, (err)->
-		
+
 
 exports.search = (req,res)->
 	url = 'http://tinysong.com/s/'+req.params.query+'?limit=30&format=json&key=a5e40d9f03761fb1ae45b298098cdda1'
@@ -120,3 +119,7 @@ exports.prev = ()->
 	vlc.status.prev()
 exports.volume = (volume)->
 	vlc.status.volume volume, (err)->
+exports.goto = (id)->
+	console.log("GOTO "+id)
+	vlc.status.goto id, (err)->
+		console.log(err)

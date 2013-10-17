@@ -34,8 +34,8 @@ io.sockets.on 'connection', (socket)->
 		api.resume()
 	socket.on 'volume', (msg)->
 		api.volume(msg)
-	socket.on 'delete', (msg)->
-		api.deleteSong(msg)
+	socket.on 'goto', (msg)->
+		api.goto(msg)
 
 
 
