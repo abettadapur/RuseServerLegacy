@@ -57,10 +57,14 @@ exports.lookUpUri = (req,res)->
 	
 exports.getStatus = (cb) ->
 	request "http://localhost:8080/requests/status.json", (error,response,body)->
-		json = JSON.parse body
-		getLocalQueue (songs)->
+		try
+			json = JSON.parse body
+			getLocalQueue (songs)->
 			json.queue = songs
 			cb json;
+		catch error
+			console.log 'Cannot get status. An error occurred'
+		
 
 exports.getStatusDebug = (req,res)->
 	request "http://localhost:8080/requests/status.json", (error,response,body)->
