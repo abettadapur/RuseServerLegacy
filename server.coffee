@@ -16,7 +16,7 @@ io.sockets.on 'connection', (socket)->
 	console.log("Connection");
 	tweets = setInterval(->
   		api.getStatus (json) ->
-  		socket.volatile.emit "status", json
+  			socket.volatile.emit "status", json
 
 	, 1000)
 

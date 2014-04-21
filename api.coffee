@@ -114,11 +114,13 @@ exports.playSong = (songID)->
 exports.playYoutube = (songID)->
 	song = recentSongs[songID]
 	url = 'https://www.youtube.com/watch?v='+songID
+	playingSongs[url] = song;
 	vlc.status.play url, (err) ->
 
 exports.addQueueYoutube = (songID)->
 	song = recentSongs[songID]
 	url = 'https://www.youtube.com/watch?v='+songID
+	playingSongs[url] = song;
 	spawn("vlc", [url])
 
 
