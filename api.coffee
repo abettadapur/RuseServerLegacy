@@ -7,7 +7,7 @@ recentSongs = {}
 playingSongs = {}
 
 exports.initialize = ()->
-	#spawn("vlc", ["--extraintf", "http", "--http-host", "0.0.0.0:8080"])
+	spawn("vlc", ["--extraintf", "http", "--http-host", "0.0.0.0:8080"])
 	console.log(vlc)
 
 
