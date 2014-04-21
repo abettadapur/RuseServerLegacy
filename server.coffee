@@ -37,9 +37,9 @@ io.sockets.on 'connection', (socket)->
 		api.volume(msg)
 	socket.on 'goto', (msg)->
 		api.goto(msg)
-	socket.on 'youplay' (msg)->
+	socket.on 'youplay', (msg)->
 		api.playYoutube(msg)
-	socket.on 'youqueue' (msg) ->
+	socket.on 'youqueue', (msg) ->
 		api.addQueueYoutube(msg)
 
 
