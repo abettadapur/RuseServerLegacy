@@ -2,11 +2,12 @@ GS = require 'grooveshark-streaming'
 request = require 'request'
 spawn = require('child_process').spawn
 vlc = require('vlc-api')()
+youtube = require 'youtube-feeds'
 recentSongs = {}
 playingSongs = {}
 
 exports.initialize = ()->
-	spawn("vlc", ["--extraintf", "http", "--http-host", "0.0.0.0:8080"])
+	#spawn("vlc", ["--extraintf", "http", "--http-host", "0.0.0.0:8080"])
 	console.log(vlc)
 
 
@@ -84,6 +85,17 @@ exports.search = (req,res)->
 
 		res.send(body)
 
+exports.yousearch = (req,res) ->
+	youtube.httpProtocol = 'https'
+	youtube.feeds.videos {q:req.params.query, orderby: 'relevance'}, (err,data)->
+		 #results = JSON.parse data
+		 for item in data.items
+		 	recentSongs[item.id] = item;
+		 res.send data.items
+
+
+
+
 exports.addQueue = (songID)->
 	song = recentSongs[songID]
 	getUrl songID, (url)->
@@ -98,6 +110,17 @@ exports.playSong = (songID)->
 		song.url = url
 		vlc.status.play url, (err) ->
 			#res.send("Playing")
+
+exports.playYoutube = (songID)->
+	song = recentSongs[songID]
+	url = 'https://www.youtube.com/watch?v='+songID
+	vlc.status.play url, (err) ->
+
+exports.addQueueYoutube = (songID)->
+	song = recentSongs[songID]
+	url = 'https://www.youtube.com/watch?v='+songID
+	spawn("vlc", [url])
+
 
 
 getUrl = (id,callback)->

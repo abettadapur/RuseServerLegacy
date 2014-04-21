@@ -11,11 +11,12 @@ io.set('log level', 1);
 
 
 
+
 io.sockets.on 'connection', (socket)->
 	console.log("Connection");
 	tweets = setInterval(->
   		api.getStatus (json) ->
-    		socket.volatile.emit "status", json
+  		socket.volatile.emit "status", json
 
 	, 1000)
 
@@ -36,6 +37,10 @@ io.sockets.on 'connection', (socket)->
 		api.volume(msg)
 	socket.on 'goto', (msg)->
 		api.goto(msg)
+	socket.on 'youplay' (msg)->
+		api.playYoutube(msg)
+	socket.on 'youqueue' (msg) ->
+		api.addQueueYoutube(msg)
 
 
 
@@ -47,6 +52,7 @@ app.get('/queue', api.getQueue)
 app.get('/queue/lookup/',api.lookUpUri)
 app.get('/status/debug', api.getStatusDebug)
 app.get('/lib/search/:query', api.search)
+app.get('/lib/ysearch/:query',api.yousearch)
 #app.get('/queue/play/:id', api.playSong)
 #app.get('/queue/add/:id', api.addQueue)
 #app.get("/url/:id", api.debugUrl)
