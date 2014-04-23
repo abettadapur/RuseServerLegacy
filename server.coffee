@@ -41,6 +41,8 @@ io.sockets.on 'connection', (socket)->
 		api.playYoutube(msg)
 	socket.on 'youqueue', (msg) ->
 		api.addQueueYoutube(msg)
+	socket.on 'delete', (msg) ->
+		api.delete msg
 
 
 
@@ -50,7 +52,7 @@ api.initialize()
 
 app.get('/queue', api.getQueue)
 app.get('/queue/lookup/',api.lookUpUri)
-app.get('/status/debug', api.getStatusDebug)
+app.get('/status/debug', api.getStatus)
 app.get('/lib/search/:query', api.search)
 app.get('/lib/ysearch/:query',api.yousearch)
 #app.get('/queue/play/:id', api.playSong)

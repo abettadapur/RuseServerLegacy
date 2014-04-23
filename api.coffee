@@ -5,17 +5,25 @@ vlc = require('vlc-api')()
 youtube = require 'youtube-feeds'
 recentSongs = {}
 playingSongs = {}
+querystring = require 'querystring'
 
 exports.initialize = ()->
 	spawn("vlc", ["--extraintf", "http", "--http-host", "0.0.0.0:8080"])
-	console.log(vlc)
+	#console.log(vlc)
 
 
 getLocalQueue = (cb)->
 	
 	#console.log("get queue")
 	songs = []
-	request "http://localhost:8080/requests/playlist.json", (error, response, body)->
+
+	options = 
+		url:"http://localhost:8080/requests/playlist.json"
+		auth: 
+			user:''
+			password:'ruse'
+
+	request options, (error, response, body)->
 	#	console.log(body)
 		json = JSON.parse body
 		children = json.children;
@@ -41,9 +49,24 @@ getLocalQueue = (cb)->
 						selected.current = false
 					
 					selected.duration = song.duration
+					selected.vlcid = song.id
+					console.log selected
 					songs.push(selected)
 	#				console.log(songs)
+				else
+					#console.log "undefined song"
+					selected = 
+						SongName:song.name
+						duration:song.duration
+						vlcid:song.id
+					if song.hasOwnProperty('current')
+						selected.current = true
+					else
+						selected.current = false
+					songs.push(selected)
 
+
+			console.log songs
 			cb(songs)
 
 exports.getQueue = (req,res)->
@@ -57,7 +80,13 @@ exports.lookUpUri = (req,res)->
 	res.send(song)
 	
 exports.getStatus = (cb) ->
-	request "http://localhost:8080/requests/status.json", (error,response,body)->
+	options = 
+		url:"http://localhost:8080/requests/status.json"
+		auth: 
+			user:''
+			password:'ruse'
+
+	request.get options, (error,response,body)->
 		json = JSON.parse body
 		getLocalQueue (songs)->
 			json.queue = songs
@@ -99,29 +128,60 @@ exports.yousearch = (req,res) ->
 exports.addQueue = (songID)->
 	song = recentSongs[songID]
 	getUrl songID, (url)->
-		playingSongs[url]=song
+		playingSongs[url] = song
 		song.url = url
-		spawn("vlc",[url])
+		query = querystring.stringify {command:'in_enqueue', input:url}
+		console.log query
+		options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+		request options
 
 exports.playSong = (songID)->
 	song = recentSongs[songID]
 	getUrl songID, (url)->
 		playingSongs[url] = song
 		song.url = url
-		vlc.status.play url, (err) ->
-			#res.send("Playing")
+		query = querystring.stringify {command:'in_play', input:url}
+		console.log query
+		options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+		request options
 
 exports.playYoutube = (songID)->
 	song = recentSongs[songID]
 	url = 'https://www.youtube.com/watch?v='+songID
+	query = querystring.stringify {command:'in_play', input:url}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
 	playingSongs[url] = song;
-	vlc.status.play url, (err) ->
+	request options
 
 exports.addQueueYoutube = (songID)->
 	song = recentSongs[songID]
 	url = 'https://www.youtube.com/watch?v='+songID
+	query = querystring.stringify {command:'in_enqueue', input:url}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
 	playingSongs[url] = song;
-	spawn("vlc", [url])
+	request options
 
 
 
@@ -135,16 +195,85 @@ exports.debugUrl = (req,res)->
 
 
 exports.pause = ()->
-	vlc.status.pause()
+	query = querystring.stringify {command:'pl_pause'}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
+
 exports.resume = ()->
-	vlc.status.resume()
+	query = querystring.stringify {command:'pl_play'}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
 exports.next = ()->
-	vlc.status.next()
+	query = querystring.stringify {command:'pl_next'}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
 exports.prev = ()->
-	vlc.status.prev()
+	query = querystring.stringify {command:'pl_previous'}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
 exports.volume = (volume)->
-	vlc.status.volume volume, (err)->
+	query = querystring.stringify {command:'volume', val:volume}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
 exports.goto = (id)->
-	console.log("GOTO "+id)
-	vlc.status.goto id, (err)->
-		console.log(err)
+	query = querystring.stringify {command:'pl_play', id:id}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
+
+exports.seek = (sec) ->
+	query = querystring.stringify {command:'seek', val:sec}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
+
+exports.delete = (id) ->
+	query = querystring.stringify {command:'pl_delete', id:id}
+	console.log query
+	options = 
+			url:"http://localhost:8080/requests/status.xml?"+query
+			auth: 
+				user:''
+				password:'ruse'
+
+	request options
